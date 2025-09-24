@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login Demo</title>
+<style>
+  body { font-family: sans-serif; padding: 2rem; }
+  input { margin: 0.5rem 0; display: block; padding: 0.5rem; width: 200px; }
+  button { padding: 0.5rem 1rem; }
+  #message { margin-top: 1rem; color: green; }
+  #error { margin-top: 1rem; color: red; }
+  pre { background: #f0f0f0; padding: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>Login or Sign Up</h1>
+
+<input type="text" id="username" placeholder="Username" />
+<input type="password" id="password" placeholder="Password" />
+<button onclick="login()">Submit</button>
+
+<div id="message"></div>
+<div id="error"></div>
+
+<script>
+async function login() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const messageDiv = document.getElementById("message");
+  const errorDiv = document.getElementById("error");
+
+  messageDiv.textContent = "";
+  errorDiv.textContent = "";
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Demo user: show all stored users
+      if (data.users) {
+        let output = "<h2>All Users:</h2><pre>";
+        for (let key in data.users) {
+          output += `${data.users[key].username} : ${data.users[key].password}\n`;
+        }
+        output += "</pre>";
+        messageDiv.innerHTML = output;
+      } else {
+        messageDiv.textContent = data.message;
+      }
+    } else {
+      errorDiv.textContent = data.error;
+    }
+  } catch (err) {
+    errorDiv.textContent = "Network error";
+    console.error(err);
+  }
+}
+</script>
+
+</body>
+</html>
